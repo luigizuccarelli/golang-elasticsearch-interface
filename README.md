@@ -1,4 +1,4 @@
-# Couchbase interface golang microservice
+# Elasticsearch interface golang microservice
 
-A simple golang db interface (couchbase) for the agoracxp project. 
+A simple golang db interface (elasticsearch). 
 
