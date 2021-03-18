@@ -1,0 +1,14 @@
+{
+    "_index": "customerinfo",
+    "_type": "_doc",
+    "_id": "1pw9Pnk6yeOMREpsFUWwc4uJuRq",
+    "_version": 1,
+    "result": "created",
+    "_shards": {
+        "total": 2,
+        "successful": 1,
+        "failed": 0
+    },
+    "_seq_no": 18,
+    "_primary_term": 1
+}

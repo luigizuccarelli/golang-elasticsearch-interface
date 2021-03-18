@@ -1,0 +1,18 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: golang-elasticsearch-interface
+  namespace: poc-demo
+  labels:
+    app: golang-elasticsearch-interface
+    app.kubernetes.io/component: golang-elasticsearch-interface
+    app.kubernetes.io/instance: golang-elasticsearch-interface
+    name: golang-elasticsearch-interface
+spec:
+  ports:
+    - name: golang-elasticsearch-interface
+      protocol: TCP
+      port: 9000
+      targetPort: 9000
+  selector:
+    name: golang-elasticsearch-interface

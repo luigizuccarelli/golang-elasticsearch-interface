@@ -1,0 +1,6 @@
+projectKey=trackmate-message-consumer
+serverUrl=http://ec2-3-248-27-131.eu-west-1.compute.amazonaws.com
+serverVersion=7.9.1.27448
+dashboardUrl=http://ec2-3-248-27-131.eu-west-1.compute.amazonaws.com/dashboard?id=trackmate-message-consumer
+ceTaskId=AXIEzRwclTthV8gxwcLp
+ceTaskUrl=http://ec2-3-248-27-131.eu-west-1.compute.amazonaws.com/api/ce/task?id=AXIEzRwclTthV8gxwcLp

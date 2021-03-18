@@ -1,0 +1,149 @@
+{
+    "took": 1,
+    "timed_out": false,
+    "_shards": {
+        "total": 1,
+        "successful": 1,
+        "skipped": 0,
+        "failed": 0
+    },
+    "hits": {
+        "total": {
+            "value": 12,
+            "relation": "eq"
+        },
+        "max_score": 0.0,
+        "hits": [
+            {
+                "_index": "customerinfo",
+                "_type": "_doc",
+                "_id": "1pt5UGUZsifyJD5wFLW4oCeZkhL",
+                "_score": 0.0,
+                "_source": {
+                    "id": "12222",
+                    "emailaddress": "nextabc@test.com",
+                    "firstname": "davy",
+                    "lastname": "schulz",
+                    "customerNumber": "12322889"
+                }
+            },
+            {
+                "_index": "customerinfo",
+                "_type": "_doc",
+                "_id": "1pt6dmScpJ4gOaRxT8B2YxL9gs4",
+                "_score": 0.0,
+                "_source": {
+                    "id": "343343",
+                    "emailaddress": "nextnextabc@test.com",
+                    "firstname": "bobby",
+                    "lastname": "schulz",
+                    "customerNumber": "3343434"
+                }
+            },
+            {
+                "_index": "customerinfo",
+                "_type": "_doc",
+                "_id": "1ptwA4fizmR3fwbGdqMp6xU23hV",
+                "_score": 0.0,
+                "_source": {
+                    "id": "9087654",
+                    "emailaddress": "chooch@test.com",
+                    "firstname": "gravin",
+                    "lastname": "lumight",
+                    "customerNumber": "9087665"
+                }
+            },
+            {
+                "_index": "customerinfo",
+                "_type": "_doc",
+                "_id": "1ptunIoaqDJ1IxKhEXhjamEn91m",
+                "_score": 0.0,
+                "_source": {
+                    "id": "88898989",
+                    "emailaddress": "chacha-cucs@test.com",
+                    "firstname": "concuspense",
+                    "lastname": "cucs",
+                    "customerNumber": "8798989"
+                }
+            },
+            {
+                "_index": "customerinfo",
+                "_type": "_doc",
+                "_id": "1pvNkqMhqMKzZdsdccBYur8CMF3",
+                "_score": 0.0,
+                "_source": {
+                    "id": "5565656",
+                    "emailaddress": "gonny@test.com",
+                    "firstname": "gonny",
+                    "lastname": "landrone",
+                    "customerNumber": "565565"
+                }
+            },
+            {
+                "_index": "customerinfo",
+                "_type": "_doc",
+                "_id": "1pvPrHNrLbRcn2eaa5G6HkLpgVM",
+                "_score": 0.0,
+                "_source": {
+                    "id": "1111111",
+                    "emailaddress": "one@test.com",
+                    "firstname": "one",
+                    "lastname": "one",
+                    "customerNumber": "1111111"
+                }
+            },
+            {
+                "_index": "customerinfo",
+                "_type": "_doc",
+                "_id": "1pvPvpY2s5cDMLFbKK7GBZxkUs4",
+                "_score": 0.0,
+                "_source": {
+                    "id": "2222222",
+                    "emailaddress": "two@test.com",
+                    "firstname": "two",
+                    "lastname": "two",
+                    "customerNumber": "22222222"
+                }
+            },
+            {
+                "_index": "customerinfo",
+                "_type": "_doc",
+                "_id": "1pvPzgbNIHR7BeMg0j26QCqgXtd",
+                "_score": 0.0,
+                "_source": {
+                    "id": "333333",
+                    "emailaddress": "three@test.com",
+                    "firstname": "three",
+                    "lastname": "three",
+                    "customerNumber": "3333333"
+                }
+            },
+            {
+                "_index": "customerinfo",
+                "_type": "_doc",
+                "_id": "1pvQ5BgJXBKnyJZ2pcx7z58tOik",
+                "_score": 0.0,
+                "_source": {
+                    "id": "44444",
+                    "emailaddress": "four@test.com",
+                    "firstname": "four",
+                    "lastname": "four",
+                    "customerNumber": "4444444"
+                }
+            },
+            {
+                "_index": "customerinfo",
+                "_type": "_doc",
+                "_id": "1pvQ8iCwiuGxkNYYyem8Ofc872D",
+                "_score": 0.0,
+                "_source": {
+                    "id": "5555555",
+                    "emailaddress": "five@test.com",
+                    "firstname": "five",
+                    "lastname": "five",
+                    "customerNumber": "5555555"
+                }
+            }
+        ]
+    }
+}

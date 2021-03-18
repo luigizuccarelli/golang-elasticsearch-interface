@@ -1,0 +1,620 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>connectors: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">lmzsoftware.com/luigizuccarelli/golang-elasticsearch-interface/pkg/connectors/client-implementation.go (82.6%)</option>
+				
+				<option value="file1">lmzsoftware.com/luigizuccarelli/golang-elasticsearch-interface/pkg/connectors/fake-connectors.go (85.7%)</option>
+				
+				<option value="file2">lmzsoftware.com/luigizuccarelli/golang-elasticsearch-interface/pkg/handlers/fake-connectors.go (88.9%)</option>
+				
+				<option value="file3">lmzsoftware.com/luigizuccarelli/golang-elasticsearch-interface/pkg/handlers/handler.go (97.3%)</option>
+				
+				<option value="file4">lmzsoftware.com/luigizuccarelli/golang-elasticsearch-interface/pkg/validator/validate.go (100.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package connectors
+
+import (
+        "bytes"
+        "encoding/json"
+        "errors"
+        "fmt"
+        "io/ioutil"
+        "net/http"
+        "os"
+
+        "github.com/segmentio/ksuid"
+        "lmzsoftware.com/luigizuccarelli/golang-elasticsearch-interface/pkg/schema"
+)
+
+func (c *Connectors) Error(msg string, val ...interface{}) <span class="cov8" title="1">{
+        c.Logger.Error(fmt.Sprintf(msg, val...))
+}</span>
+
+func (c *Connectors) Info(msg string, val ...interface{}) <span class="cov8" title="1">{
+        c.Logger.Info(fmt.Sprintf(msg, val...))
+}</span>
+
+func (c *Connectors) Debug(msg string, val ...interface{}) <span class="cov8" title="1">{
+        c.Logger.Debug(fmt.Sprintf(msg, val...))
+}</span>
+
+func (c *Connectors) Trace(msg string, val ...interface{}) <span class="cov8" title="1">{
+        c.Logger.Trace(fmt.Sprintf(msg, val...))
+}</span>
+
+// ProcessDocument - function that inserts data to elasticsearch
+func (c *Connectors) ProcessDocument(method string, gs *schema.GenericInterface) error <span class="cov8" title="1">{
+        var id string
+        // this is redundant but needs to be done
+        c.Info("Function ProcessDocument input data %v", gs.Payload)
+
+        if gs.Payload == nil </span><span class="cov8" title="1">{
+                c.Error("ProcessDocument payload is empty")
+                return errors.New("payload is empty")
+        }</span>
+        <span class="cov8" title="1">doc, err := json.MarshalIndent(gs.Payload, "", "  ")
+        if err != nil </span><span class="cov0" title="0">{
+                c.Error("Function ProcessDocument marshalling data from struct: %v", err)
+                return err
+        }</span>
+        <span class="cov8" title="1">if gs.Id == "" </span><span class="cov8" title="1">{
+                id = ksuid.New().String()
+        }</span> else<span class="cov8" title="1"> {
+                id = gs.Id
+        }</span>
+        <span class="cov8" title="1">req, err := http.NewRequest(method, os.Getenv("ELASTICSEARCH_URL")+"/"+os.Getenv("INDEX")+"/_doc/"+id, bytes.NewBuffer(doc))
+        req.Header.Set("Content-Type", "application/json")
+
+        resp, err := c.Do(req)
+        if err != nil </span><span class="cov8" title="1">{
+                c.Error("Function ProcessDocument request %v", err)
+                return err
+        }</span>
+        <span class="cov8" title="1">defer resp.Body.Close()
+        data, err := ioutil.ReadAll(resp.Body)
+        if err != nil </span><span class="cov0" title="0">{
+                c.Error("Function ProcessDocument reading response %v", err)
+                return err
+        }</span>
+
+        <span class="cov8" title="1">c.Debug("Function ProcessDocument result %v", string(data))
+        c.Info("Function ProcessDocument returned successfully")
+        return nil</span>
+}
+
+// GetDocument - use search firstname,lastname, email
+func (c *Connectors) GetDocuments(gs *schema.GenericInterface) ([]byte, error) <span class="cov8" title="1">{
+
+        query := `{
+   "from" : 0,
+         "size": 10,
+         "query": {
+    "bool": {
+      "must": [],
+      "filter": [
+        {
+          "bool": {
+            "should": [
+              {
+                "query_string": {
+                  "fields": [
+                    "firstname"
+                  ],
+                  "query": "` + gs.Payload.FirstName + `*"
+                }
+              }
+            ],
+            "minimum_should_match": 1
+          }
+        },
+                                {
+          "bool": {
+            "should": [
+              {
+                "query_string": {
+                  "fields": [
+                    "lastname"
+                  ],
+                  "query": "` + gs.Payload.LastName + `*"
+                }
+              }
+            ],
+            "minimum_should_match": 1
+          }
+        },
+                                {
+          "bool": {
+            "should": [
+              {
+                "query_string": {
+                  "fields": [
+                    "emailaddress"
+                  ],
+                  "query": "` + gs.Payload.EmailAddress + `*"
+                }
+              }
+            ],
+            "minimum_should_match": 1
+          }
+        }
+      ],
+      "should": [],
+      "must_not": []
+    }
+   }
+ }`
+
+        c.Info("Query string %s", query)
+        req, err := http.NewRequest("POST", os.Getenv("ELASTICSEARCH_URL")+"/"+os.Getenv("INDEX")+"/_search", bytes.NewBuffer([]byte(query)))
+        req.Header.Set("Content-Type", "application/json")
+
+        resp, err := c.Do(req)
+        if err != nil </span><span class="cov0" title="0">{
+                c.Error("Function GetDocument request %v", err)
+                return []byte(""), err
+        }</span>
+        <span class="cov8" title="1">defer resp.Body.Close()
+        data, err := ioutil.ReadAll(resp.Body)
+        if err != nil </span><span class="cov0" title="0">{
+                c.Error("Function GetDocument reading response %v", err)
+                return []byte(""), err
+        }</span>
+
+        <span class="cov8" title="1">c.Debug("Function GetDocument result %v", string(data))
+        c.Info("Function GetDocument returned successfully")
+        return data, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">// +build fake
+
+package connectors
+
+import (
+        "bytes"
+        "errors"
+        "fmt"
+        "io/ioutil"
+        "net/http"
+
+        "github.com/microlib/simple"
+)
+
+var count int = 0
+
+// Connectors - overrides the real implemntation (using gocb.* dependencies)
+// The file directive +build mock ensures its use (see the first line of this file)_
+type Connectors struct {
+        Http   *http.Client
+        Logger *simple.Logger
+        Flag   string
+}
+
+// Do - http wrapper
+func (c *Connectors) Do(req *http.Request) (*http.Response, error) <span class="cov8" title="1">{
+        if c.Flag == "error" </span><span class="cov8" title="1">{
+                return &amp;http.Response{}, errors.New("forced http error")
+        }</span>
+        <span class="cov8" title="1">return c.Http.Do(req)</span>
+}
+
+func (c *Connectors) Meta(id string) <span class="cov8" title="1">{
+        c.Flag = id
+}</span>
+
+// RoundTripFunc .
+type RoundTripFunc func(req *http.Request) *http.Response
+
+// RoundTrip .
+func (f RoundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) <span class="cov8" title="1">{
+        return f(req), nil
+}</span>
+
+//NewTestClient returns *http.Client with Transport replaced to avoid making real calls
+func NewHttpTestClient(fn RoundTripFunc) *http.Client <span class="cov8" title="1">{
+        return &amp;http.Client{
+                Transport: RoundTripFunc(fn),
+        }
+}</span>
+
+// NewTestConnectors - interface for mocking all tests
+func NewTestConnectors(file string, code int, logger *simple.Logger) Clients <span class="cov8" title="1">{
+
+        // we first load the json payload to simulate a call to middleware
+        // for now just ignore failures.
+        data, err := ioutil.ReadFile(file)
+        if err != nil </span><span class="cov0" title="0">{
+                logger.Error(fmt.Sprintf("file data %v\n", err))
+                panic(err)</span>
+        }
+        <span class="cov8" title="1">httpclient := NewHttpTestClient(func(req *http.Request) *http.Response </span><span class="cov8" title="1">{
+                return &amp;http.Response{
+                        StatusCode: code,
+                        // Send response to be tested
+
+                        Body: ioutil.NopCloser(bytes.NewBufferString(string(data))),
+                        // Must be set to non-nil value or it panics
+                        Header: make(http.Header),
+                }
+        }</span>)
+        <span class="cov8" title="1">conns := &amp;Connectors{Http: httpclient, Logger: logger, Flag: "false"}
+        return conns</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">// +build fake
+
+package handlers
+
+import (
+        "errors"
+        "fmt"
+        "io/ioutil"
+        "net/http"
+
+        "github.com/microlib/simple"
+        "lmzsoftware.com/luigizuccarelli/golang-elasticsearch-interface/pkg/connectors"
+        "lmzsoftware.com/luigizuccarelli/golang-elasticsearch-interface/pkg/schema"
+)
+
+var count int = 0
+
+type errReader int
+
+func (errReader) Read(p []byte) (n int, err error) <span class="cov8" title="1">{
+        return 0, errors.New("Inject (force) readAll test error")
+}</span>
+
+type FakeConnectors struct {
+        Http   *http.Client
+        Logger *simple.Logger
+        Name   string
+        Force  string
+}
+
+// GetAllDocument - simulate (fake) the call
+func (c *FakeConnectors) GetDocuments(gs *schema.GenericInterface) ([]byte, error) <span class="cov8" title="1">{
+        if c.Force == "error" </span><span class="cov8" title="1">{
+                return []byte(""), errors.New("GetAllDocument forced error")
+        }</span>
+        <span class="cov8" title="1">d, _ := ioutil.ReadFile("../../tests/all-data.json")
+        return d, nil</span>
+}
+
+// ProcessDocument - simulate (fake) the call
+func (c *FakeConnectors) ProcessDocument(method string, gs *schema.GenericInterface) error <span class="cov8" title="1">{
+        if c.Force == "error" </span><span class="cov8" title="1">{
+                return errors.New("ProcessDocument forced error")
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+// logger wrapper
+func (r *FakeConnectors) Error(msg string, val ...interface{}) <span class="cov8" title="1">{
+        r.Logger.Error(fmt.Sprintf(msg, val...))
+}</span>
+
+func (r *FakeConnectors) Info(msg string, val ...interface{}) <span class="cov8" title="1">{
+        r.Logger.Info(fmt.Sprintf(msg, val...))
+}</span>
+
+func (r *FakeConnectors) Debug(msg string, val ...interface{}) <span class="cov0" title="0">{
+        r.Logger.Debug(fmt.Sprintf(msg, val...))
+}</span>
+
+func (r *FakeConnectors) Trace(msg string, val ...interface{}) <span class="cov8" title="1">{
+        r.Logger.Trace(fmt.Sprintf(msg, val...))
+}</span>
+
+func (c *FakeConnectors) Meta(flag string) <span class="cov8" title="1">{
+        c.Force = flag
+}</span>
+
+// Do - http wrapper
+func (c *FakeConnectors) Do(req *http.Request) (*http.Response, error) <span class="cov0" title="0">{
+        return c.Http.Do(req)
+}</span>
+
+// NewTestConnectors - inject our test connectors
+func NewTestConnectors(filename string, code int, logger *simple.Logger) connectors.Clients <span class="cov8" title="1">{
+
+        // we first load the json payload to simulate response data
+        // for now just ignore failures.
+        file, _ := ioutil.ReadFile(filename)
+        logger.Trace(fmt.Sprintf("File %s with data %s", filename, string(file)))
+
+        conn := &amp;FakeConnectors{Logger: logger, Name: "test"}
+        return conn
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package handlers
+
+import (
+        "bytes"
+        "encoding/json"
+        "fmt"
+        "io/ioutil"
+        "net/http"
+        "os"
+        "strconv"
+
+        "lmzsoftware.com/luigizuccarelli/golang-elasticsearch-interface/pkg/connectors"
+        "lmzsoftware.com/luigizuccarelli/golang-elasticsearch-interface/pkg/schema"
+)
+
+const (
+        CONTENTTYPE     string = "Content-Type"
+        APPLICATIONJSON string = "application/json"
+        ERROR           string = "ERROR"
+)
+
+// DocumentHandler - all data api function handler
+func DocumentHandler(w http.ResponseWriter, r *http.Request, con connectors.Clients) <span class="cov8" title="1">{
+        var gs *schema.GenericInterface
+
+        addHeaders(w, r)
+        //vars := mux.Vars(r)
+
+        con.Info("DocumentHandler method %s", r.Method)
+
+        // ensure we don't have nil - it will cause a null pointer exception
+        if r.Body == nil </span><span class="cov0" title="0">{
+                r.Body = ioutil.NopCloser(bytes.NewBufferString(""))
+        }</span>
+        <span class="cov8" title="1">body, err := ioutil.ReadAll(r.Body)
+        if err != nil </span><span class="cov8" title="1">{
+                msg := "DocumentHandler body data error :  %v"
+                con.Error(msg, err)
+                response := responseFormat(http.StatusInternalServerError, "ERROR", w, msg, err)
+                fmt.Fprintf(w, "%s", response)
+                return
+        }</span>
+
+        <span class="cov8" title="1">con.Trace("DocumentHandler request body : %s", string(body))
+
+        // unmarshal result - ensures correct json struct  (validation)
+        errs := json.Unmarshal(body, &amp;gs)
+        if errs != nil </span><span class="cov8" title="1">{
+                msg := "DocumentHandler could not unmarshal input data to schema %v"
+                con.Error(msg, errs)
+                response := responseFormat(http.StatusInternalServerError, "ERROR", w, msg, errs)
+                fmt.Fprintf(w, "%s", response)
+                return
+        }</span>
+        <span class="cov8" title="1">e := con.ProcessDocument(r.Method, gs)
+        if e != nil </span><span class="cov8" title="1">{
+                msg := "DocumentHandler could not insert(elasticsearch) %v"
+                con.Error(msg, e)
+                response := responseFormat(http.StatusInternalServerError, "ERROR", w, msg, e)
+                fmt.Fprintf(w, "%s", response)
+                return
+        }</span>
+
+        <span class="cov8" title="1">response := responseFormat(http.StatusOK, "OK", w, "DcoumentHandler call successfull")
+        fmt.Fprintf(w, "%s", response)
+        return</span>
+}
+
+// SearchHandler - all data api function handler
+func SearchHandler(w http.ResponseWriter, r *http.Request, con connectors.Clients) <span class="cov8" title="1">{
+        var gs *schema.GenericInterface
+
+        addHeaders(w, r)
+        //vars := mux.Vars(r)
+
+        con.Info("SearchHandler method %s", r.Method)
+
+        if r.Method == "POST" </span><span class="cov8" title="1">{
+                body, err := ioutil.ReadAll(r.Body)
+                if err != nil </span><span class="cov8" title="1">{
+                        msg := "SearchHandler body data error :  %v"
+                        con.Error(msg, err)
+                        response := responseFormat(http.StatusInternalServerError, "ERROR", w, msg, err)
+                        fmt.Fprintf(w, "%s\n", response)
+                        return
+                }</span>
+
+                <span class="cov8" title="1">con.Trace("SearchHandler request body : %s", string(body))
+
+                // unmarshal result - ensures correct json struct  (validation)
+                errs := json.Unmarshal(body, &amp;gs)
+                if errs != nil </span><span class="cov8" title="1">{
+                        msg := "SearchHandler could not unmarshal input data to schema %v"
+                        con.Error(msg, errs)
+                        response := responseFormat(http.StatusInternalServerError, "ERROR", w, msg, errs)
+                        fmt.Fprintf(w, "%s\n", response)
+                        return
+                }</span>
+
+                // ensure parameter is valid
+                <span class="cov8" title="1">es, err := con.GetDocuments(gs)
+                if err != nil </span><span class="cov8" title="1">{
+                        msg := "SearchHandler (elastisearch) lookup %v"
+                        con.Error(msg, err)
+                        response := responseFormat(http.StatusInternalServerError, "ERROR", w, msg, errs)
+                        fmt.Fprintf(w, "%s\n", response)
+                        return
+                }</span>
+
+                <span class="cov8" title="1">var eschema *schema.ElasticResponse
+                // we only want the hits array
+                json.Unmarshal(es, &amp;eschema)
+                b, _ := json.MarshalIndent(eschema.Hits.Hits, "", "        ")
+                response := responseFormat(http.StatusOK, "OK", w, "%s", string(b))
+                fmt.Fprintf(w, "%s\n", response)
+                return</span>
+        }
+}
+
+// utility functions
+
+// responsFormat
+func responseFormat(code int, status string, w http.ResponseWriter, msg string, val ...interface{}) string <span class="cov8" title="1">{
+        response := `{"Code":"` + strconv.Itoa(code) + `", "Status": "` + status + `", "Message":"` + fmt.Sprintf(msg, val...) + `"}`
+        w.WriteHeader(code)
+        return response
+}</span>
+
+// IsAlive - used for readiness and liveness probes
+func IsAlive(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        addHeaders(w, r)
+        fmt.Fprintf(w, "{ \"version\" : \""+os.Getenv("VERSION")+"\" , \"name\": \""+os.Getenv("NAME")+"\" }")
+        return
+}</span>
+
+// addHeaders - headers (with cors)
+func addHeaders(w http.ResponseWriter, r *http.Request) <span class="cov8" title="1">{
+        if r.Header.Get("API-KEY") != "" </span><span class="cov0" title="0">{
+                w.Header().Set("API_KEY_PT", r.Header.Get("API_KEY"))
+        }</span>
+        <span class="cov8" title="1">w.Header().Set(CONTENTTYPE, APPLICATIONJSON)
+        // use this for cors
+        w.Header().Set("Access-Control-Allow-Origin", "*")
+        w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+        w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, Accept-Language")</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package validator
+
+import (
+        "fmt"
+        "os"
+        "strconv"
+        "strings"
+
+        "github.com/microlib/simple"
+)
+
+// checkEnvars - private function, iterates through each item and checks the required field
+func checkEnvar(item string, logger *simple.Logger) error <span class="cov8" title="1">{
+        name := strings.Split(item, ",")[0]
+        required, _ := strconv.ParseBool(strings.Split(item, ",")[1])
+        logger.Trace(fmt.Sprintf("name %s : required %t", name, required))
+        if os.Getenv(name) == "" </span><span class="cov8" title="1">{
+                if required </span><span class="cov8" title="1">{
+                        logger.Error(fmt.Sprintf("%s envar is mandatory please set it", name))
+                        return fmt.Errorf(fmt.Sprintf("%s envar is mandatory please set it", name))
+                }</span>
+
+                <span class="cov8" title="1">logger.Error(fmt.Sprintf("%s envar is empty please set it", name))</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+
+// ValidateEnvars : public call that groups all envar validations
+// These envars are set via the openshift template
+func ValidateEnvars(logger *simple.Logger) error <span class="cov8" title="1">{
+        items := []string{
+                "LOG_LEVEL,false",
+                "VERSION,true",
+                "NAME,true",
+                "ELASTICSEARCH_URL,true",
+                "INDEX,true",
+        }
+        for x := range items </span><span class="cov8" title="1">{
+                if err := checkEnvar(items[x], logger); err != nil </span><span class="cov8" title="1">{
+                        return err
+                }</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
