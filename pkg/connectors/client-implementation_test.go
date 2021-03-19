@@ -41,7 +41,7 @@ func TestConnections(t *testing.T) {
 		gs := &schema.GenericInterface{Payload: ci}
 		err := con.ProcessDocument("PUT", gs)
 		if err == nil {
-			t.Errorf(fmt.Sprintf("Function (%s) assert (error should not be nil) -  got (%v) wanted (%v)", "GetDocument", nil, "error"))
+			t.Errorf(fmt.Sprintf("Function (%s) assert (error should not be nil) -  got (%v) wanted (%v)", "ProcessDocument", nil, "error"))
 		}
 	})
 
@@ -50,17 +50,18 @@ func TestConnections(t *testing.T) {
 		gs := &schema.GenericInterface{}
 		err := con.ProcessDocument("PUT", gs)
 		if err == nil {
-			t.Errorf(fmt.Sprintf("Function (%s) assert (error shouldi not be nil) -  got (%v) wanted (%v)", "GetDocument", nil, "error"))
+			t.Errorf(fmt.Sprintf("Function (%s) assert (error shouldi not be nil) -  got (%v) wanted (%v)", "ProcessDocument", nil, "error"))
 		}
 	})
 
 	t.Run("GetDocuments : should pass", func(t *testing.T) {
 		con := NewTestConnectors("../../tests/all-data.json", 200, logger)
-		ci := &schema.CustomerInfo{LastName: "fritz"}
+		// FirstName,LastName,EmailAddress are mandatory
+		ci := &schema.CustomerInfo{LastName: "fritz", FirstName: "", EmailAddress: ""}
 		gs := &schema.GenericInterface{Id: "123456", Payload: ci}
 		data, err := con.GetDocuments(gs)
 		if err != nil {
-			t.Errorf(fmt.Sprintf("Function (%s) assert (error should be nil) -  got (%v) wanted (%v)", "ProcessDocument", err, nil))
+			t.Errorf(fmt.Sprintf("Function (%s) assert (error should be nil) -  got (%v) wanted (%v)", "GetDocuments", err, nil))
 		}
 		con.Info("Response data %s", string(data))
 	})

@@ -81,7 +81,7 @@ func TestHandlers(t *testing.T) {
 		}
 	})
 
-	t.Run("DoumentHandler : should fail (force json input)", func(t *testing.T) {
+	t.Run("DoumentHandler : should fail (force json error)", func(t *testing.T) {
 		var STATUS int = 500
 
 		requestPayload, _ := ioutil.ReadFile("../../tests/generic-interface-error.json")

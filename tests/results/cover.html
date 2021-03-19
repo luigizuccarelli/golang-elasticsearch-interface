@@ -55,13 +55,13 @@
 			<div id="nav">
 				<select id="files">
 				
-				<option value="file0">lmzsoftware.com/luigizuccarelli/golang-elasticsearch-interface/pkg/connectors/client-implementation.go (82.6%)</option>
+				<option value="file0">lmzsoftware.com/luigizuccarelli/golang-elasticsearch-interface/pkg/connectors/client-implementation.go (83.7%)</option>
 				
 				<option value="file1">lmzsoftware.com/luigizuccarelli/golang-elasticsearch-interface/pkg/connectors/fake-connectors.go (85.7%)</option>
 				
-				<option value="file2">lmzsoftware.com/luigizuccarelli/golang-elasticsearch-interface/pkg/handlers/fake-connectors.go (88.9%)</option>
+				<option value="file2">lmzsoftware.com/luigizuccarelli/golang-elasticsearch-interface/pkg/handlers/fake-connectors.go (83.3%)</option>
 				
-				<option value="file3">lmzsoftware.com/luigizuccarelli/golang-elasticsearch-interface/pkg/handlers/handler.go (97.3%)</option>
+				<option value="file3">lmzsoftware.com/luigizuccarelli/golang-elasticsearch-interface/pkg/handlers/handler.go (96.9%)</option>
 				
 				<option value="file4">lmzsoftware.com/luigizuccarelli/golang-elasticsearch-interface/pkg/validator/validate.go (100.0%)</option>
 				
@@ -87,6 +87,7 @@ import (
         "io/ioutil"
         "net/http"
         "os"
+        "text/template"
 
         "github.com/segmentio/ksuid"
         "lmzsoftware.com/luigizuccarelli/golang-elasticsearch-interface/pkg/schema"
@@ -150,84 +151,29 @@ func (c *Connectors) ProcessDocument(method string, gs *schema.GenericInterface)
 
 // GetDocument - use search firstname,lastname, email
 func (c *Connectors) GetDocuments(gs *schema.GenericInterface) ([]byte, error) <span class="cov8" title="1">{
+        var tpl bytes.Buffer
+        tmpl := template.New("searchquery")
+        tmp, _ := tmpl.Parse(schema.SearchQueryTemplate)
+        tmp.Execute(&amp;tpl, gs)
 
-        query := `{
-   "from" : 0,
-         "size": 10,
-         "query": {
-    "bool": {
-      "must": [],
-      "filter": [
-        {
-          "bool": {
-            "should": [
-              {
-                "query_string": {
-                  "fields": [
-                    "firstname"
-                  ],
-                  "query": "` + gs.Payload.FirstName + `*"
-                }
-              }
-            ],
-            "minimum_should_match": 1
-          }
-        },
-                                {
-          "bool": {
-            "should": [
-              {
-                "query_string": {
-                  "fields": [
-                    "lastname"
-                  ],
-                  "query": "` + gs.Payload.LastName + `*"
-                }
-              }
-            ],
-            "minimum_should_match": 1
-          }
-        },
-                                {
-          "bool": {
-            "should": [
-              {
-                "query_string": {
-                  "fields": [
-                    "emailaddress"
-                  ],
-                  "query": "` + gs.Payload.EmailAddress + `*"
-                }
-              }
-            ],
-            "minimum_should_match": 1
-          }
-        }
-      ],
-      "should": [],
-      "must_not": []
-    }
-   }
- }`
-
-        c.Info("Query string %s", query)
-        req, err := http.NewRequest("POST", os.Getenv("ELASTICSEARCH_URL")+"/"+os.Getenv("INDEX")+"/_search", bytes.NewBuffer([]byte(query)))
+        c.Debug("Query string %s", string(tpl.String()))
+        req, err := http.NewRequest("POST", os.Getenv("ELASTICSEARCH_URL")+"/"+os.Getenv("INDEX")+"/_search", bytes.NewBuffer(tpl.Bytes()))
         req.Header.Set("Content-Type", "application/json")
 
         resp, err := c.Do(req)
         if err != nil </span><span class="cov0" title="0">{
-                c.Error("Function GetDocument request %v", err)
+                c.Error("Function GetDocuments request %v", err)
                 return []byte(""), err
         }</span>
         <span class="cov8" title="1">defer resp.Body.Close()
         data, err := ioutil.ReadAll(resp.Body)
         if err != nil </span><span class="cov0" title="0">{
-                c.Error("Function GetDocument reading response %v", err)
+                c.Error("Function GetDocuments reading response %v", err)
                 return []byte(""), err
         }</span>
 
-        <span class="cov8" title="1">c.Debug("Function GetDocument result %v", string(data))
-        c.Info("Function GetDocument returned successfully")
+        <span class="cov8" title="1">c.Debug("Function GetDocuments result %v", string(data))
+        c.Info("Function GetDocuments returned successfully")
         return data, nil</span>
 }
 </pre>
@@ -360,15 +306,15 @@ func (r *FakeConnectors) Error(msg string, val ...interface{}) <span class="cov8
         r.Logger.Error(fmt.Sprintf(msg, val...))
 }</span>
 
-func (r *FakeConnectors) Info(msg string, val ...interface{}) <span class="cov8" title="1">{
+func (r *FakeConnectors) Info(msg string, val ...interface{}) <span class="cov0" title="0">{
         r.Logger.Info(fmt.Sprintf(msg, val...))
 }</span>
 
-func (r *FakeConnectors) Debug(msg string, val ...interface{}) <span class="cov0" title="0">{
+func (r *FakeConnectors) Debug(msg string, val ...interface{}) <span class="cov8" title="1">{
         r.Logger.Debug(fmt.Sprintf(msg, val...))
 }</span>
 
-func (r *FakeConnectors) Trace(msg string, val ...interface{}) <span class="cov8" title="1">{
+func (r *FakeConnectors) Trace(msg string, val ...interface{}) <span class="cov0" title="0">{
         r.Logger.Trace(fmt.Sprintf(msg, val...))
 }</span>
 
@@ -417,37 +363,23 @@ const (
 
 // DocumentHandler - all data api function handler
 func DocumentHandler(w http.ResponseWriter, r *http.Request, con connectors.Clients) <span class="cov8" title="1">{
-        var gs *schema.GenericInterface
-
         addHeaders(w, r)
-        //vars := mux.Vars(r)
-
-        con.Info("DocumentHandler method %s", r.Method)
+        con.Debug("DocumentHandler method %s", r.Method)
 
         // ensure we don't have nil - it will cause a null pointer exception
         if r.Body == nil </span><span class="cov0" title="0">{
                 r.Body = ioutil.NopCloser(bytes.NewBufferString(""))
         }</span>
-        <span class="cov8" title="1">body, err := ioutil.ReadAll(r.Body)
+
+        <span class="cov8" title="1">gs, err := getStruct(r)
         if err != nil </span><span class="cov8" title="1">{
-                msg := "DocumentHandler body data error :  %v"
+                msg := "DocumentHandler :  %v"
                 con.Error(msg, err)
                 response := responseFormat(http.StatusInternalServerError, "ERROR", w, msg, err)
                 fmt.Fprintf(w, "%s", response)
                 return
         }</span>
 
-        <span class="cov8" title="1">con.Trace("DocumentHandler request body : %s", string(body))
-
-        // unmarshal result - ensures correct json struct  (validation)
-        errs := json.Unmarshal(body, &amp;gs)
-        if errs != nil </span><span class="cov8" title="1">{
-                msg := "DocumentHandler could not unmarshal input data to schema %v"
-                con.Error(msg, errs)
-                response := responseFormat(http.StatusInternalServerError, "ERROR", w, msg, errs)
-                fmt.Fprintf(w, "%s", response)
-                return
-        }</span>
         <span class="cov8" title="1">e := con.ProcessDocument(r.Method, gs)
         if e != nil </span><span class="cov8" title="1">{
                 msg := "DocumentHandler could not insert(elasticsearch) %v"
@@ -457,38 +389,22 @@ func DocumentHandler(w http.ResponseWriter, r *http.Request, con connectors.Clie
                 return
         }</span>
 
-        <span class="cov8" title="1">response := responseFormat(http.StatusOK, "OK", w, "DcoumentHandler call successfull")
+        <span class="cov8" title="1">response := responseFormat(http.StatusOK, "OK", w, "DocumentHandler call successfull")
         fmt.Fprintf(w, "%s", response)
         return</span>
 }
 
 // SearchHandler - all data api function handler
 func SearchHandler(w http.ResponseWriter, r *http.Request, con connectors.Clients) <span class="cov8" title="1">{
-        var gs *schema.GenericInterface
-
         addHeaders(w, r)
-        //vars := mux.Vars(r)
-
-        con.Info("SearchHandler method %s", r.Method)
+        con.Debug("SearchHandler method %s", r.Method)
 
         if r.Method == "POST" </span><span class="cov8" title="1">{
-                body, err := ioutil.ReadAll(r.Body)
+                gs, err := getStruct(r)
                 if err != nil </span><span class="cov8" title="1">{
-                        msg := "SearchHandler body data error :  %v"
+                        msg := "SearchHandler :  %v"
                         con.Error(msg, err)
                         response := responseFormat(http.StatusInternalServerError, "ERROR", w, msg, err)
-                        fmt.Fprintf(w, "%s\n", response)
-                        return
-                }</span>
-
-                <span class="cov8" title="1">con.Trace("SearchHandler request body : %s", string(body))
-
-                // unmarshal result - ensures correct json struct  (validation)
-                errs := json.Unmarshal(body, &amp;gs)
-                if errs != nil </span><span class="cov8" title="1">{
-                        msg := "SearchHandler could not unmarshal input data to schema %v"
-                        con.Error(msg, errs)
-                        response := responseFormat(http.StatusInternalServerError, "ERROR", w, msg, errs)
                         fmt.Fprintf(w, "%s\n", response)
                         return
                 }</span>
@@ -498,7 +414,7 @@ func SearchHandler(w http.ResponseWriter, r *http.Request, con connectors.Client
                 if err != nil </span><span class="cov8" title="1">{
                         msg := "SearchHandler (elastisearch) lookup %v"
                         con.Error(msg, err)
-                        response := responseFormat(http.StatusInternalServerError, "ERROR", w, msg, errs)
+                        response := responseFormat(http.StatusInternalServerError, "ERROR", w, msg, err)
                         fmt.Fprintf(w, "%s\n", response)
                         return
                 }</span>
@@ -514,6 +430,24 @@ func SearchHandler(w http.ResponseWriter, r *http.Request, con connectors.Client
 }
 
 // utility functions
+
+// getStruct - build struct from json body data
+func getStruct(r *http.Request) (*schema.GenericInterface, error) <span class="cov8" title="1">{
+        var gs *schema.GenericInterface
+        body, err := ioutil.ReadAll(r.Body)
+        if err != nil </span><span class="cov8" title="1">{
+                return gs, err
+        }</span>
+
+        // unmarshal result - ensures correct json struct  (validation)
+        <span class="cov8" title="1">errs := json.Unmarshal(body, &amp;gs)
+        if errs != nil </span><span class="cov8" title="1">{
+                return gs, errs
+        }</span>
+
+        <span class="cov8" title="1">return gs, nil</span>
+
+}
 
 // responsFormat
 func responseFormat(code int, status string, w http.ResponseWriter, msg string, val ...interface{}) string <span class="cov8" title="1">{

@@ -22,6 +22,11 @@ func (c *Connectors) Do(req *http.Request) (*http.Response, error) {
 	return c.Http.Do(req)
 }
 
+// Meta - this is used for testing but needs to be implemented
+func (c *Connectors) Meta(id string) {
+	// not implented - used for testing only
+}
+
 // NewClientConnectors : function that initialises connections to DB's, caches' queues etc
 // Seperating this functionality here allows us to inject a fake or mock connection object for testing
 func NewClientConnectors(logger *simple.Logger) Clients {

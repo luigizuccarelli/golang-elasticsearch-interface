@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"text/template"
 
 	"github.com/segmentio/ksuid"
 	"lmzsoftware.com/luigizuccarelli/golang-elasticsearch-interface/pkg/schema"
@@ -71,83 +72,28 @@ func (c *Connectors) ProcessDocument(method string, gs *schema.GenericInterface)
 
 // GetDocument - use search firstname,lastname, email
 func (c *Connectors) GetDocuments(gs *schema.GenericInterface) ([]byte, error) {
+	var tpl bytes.Buffer
+	tmpl := template.New("searchquery")
+	tmp, _ := tmpl.Parse(schema.SearchQueryTemplate)
+	tmp.Execute(&tpl, gs)
 
-	query := `{
-   "from" : 0,
-	 "size": 10,
-	 "query": {
-    "bool": {
-      "must": [],
-      "filter": [
-        {
-          "bool": {
-            "should": [
-              {
-                "query_string": {
-                  "fields": [
-                    "firstname"
-                  ],
-                  "query": "` + gs.Payload.FirstName + `*"
-                }
-              }
-            ],
-            "minimum_should_match": 1
-          }
-        },
-				{
-          "bool": {
-            "should": [
-              {
-                "query_string": {
-                  "fields": [
-                    "lastname"
-                  ],
-                  "query": "` + gs.Payload.LastName + `*"
-                }
-              }
-            ],
-            "minimum_should_match": 1
-          }
-        },
-				{
-          "bool": {
-            "should": [
-              {
-                "query_string": {
-                  "fields": [
-                    "emailaddress"
-                  ],
-                  "query": "` + gs.Payload.EmailAddress + `*"
-                }
-              }
-            ],
-            "minimum_should_match": 1
-          }
-        }
-      ],
-      "should": [],
-      "must_not": []
-    }
-   }
- }`
-
-	c.Info("Query string %s", query)
-	req, err := http.NewRequest("POST", os.Getenv("ELASTICSEARCH_URL")+"/"+os.Getenv("INDEX")+"/_search", bytes.NewBuffer([]byte(query)))
+	c.Debug("Query string %s", string(tpl.String()))
+	req, err := http.NewRequest("POST", os.Getenv("ELASTICSEARCH_URL")+"/"+os.Getenv("INDEX")+"/_search", bytes.NewBuffer(tpl.Bytes()))
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := c.Do(req)
 	if err != nil {
-		c.Error("Function GetDocument request %v", err)
+		c.Error("Function GetDocuments request %v", err)
 		return []byte(""), err
 	}
 	defer resp.Body.Close()
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		c.Error("Function GetDocument reading response %v", err)
+		c.Error("Function GetDocuments reading response %v", err)
 		return []byte(""), err
 	}
 
-	c.Debug("Function GetDocument result %v", string(data))
-	c.Info("Function GetDocument returned successfully")
+	c.Debug("Function GetDocuments result %v", string(data))
+	c.Info("Function GetDocuments returned successfully")
 	return data, nil
 }

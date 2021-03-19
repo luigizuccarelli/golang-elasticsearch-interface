@@ -51,10 +51,69 @@ type GenericInterface struct {
 // CustomerInfo schema
 type CustomerInfo struct {
 	Id             string `json:"id,omitempty"`
-	EmailAddress   string `json:"emailaddress,omitempty"`
+	EmailAddress   string `json:"emailaddress"`
 	PhoneNumber    string `json:"phonenumber,omitempty"`
 	Mobile         string `json:"mobile,omitempty"`
-	FirstName      string `json:"firstname,omitempty"`
-	LastName       string `json:"lastname,omitempty"`
+	FirstName      string `json:"firstname"`
+	LastName       string `json:"lastname"`
 	CustomerNumber string `json:"customerNumber,omitempty"`
 }
+
+var SearchQueryTemplate = `{
+"from" : 0,
+"size": 10,
+"query": {
+  "bool": {
+    "must": [],
+    "filter": [
+      {
+        "bool": {
+          "should": [
+            {
+              "query_string": {
+                "fields": [
+                  "firstname"
+                ],
+                "query": "{{ .Payload.FirstName }}*"
+              }
+            }
+          ],
+          "minimum_should_match": 1
+        }
+      },
+			{
+        "bool": {
+          "should": [
+            {
+              "query_string": {
+                "fields": [
+                  "lastname"
+                ],
+                "query": "{{ .Payload.LastName }}*"
+              }
+            }
+          ],
+          "minimum_should_match": 1
+        }
+      },
+			{
+        "bool": {
+          "should": [
+            {
+              "query_string": {
+                "fields": [
+                  "emailaddress"
+                ],
+                "query": "{{ .Payload.EmailAddress }}*"
+              }
+            }
+          ],
+          "minimum_should_match": 1
+        }
+      }
+    ],
+    "should": [],
+    "must_not": []
+  }
+ }
+}`
