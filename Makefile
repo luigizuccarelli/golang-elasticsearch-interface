@@ -23,7 +23,7 @@ clean:
 	go clean ./...
 
 container:
-	podman build -t quay.io/luigizuccarelli/golang-elasticsearch-interface:1.15.6 .
+	podman build -t quay.io/luigizuccarelli/golang-elasticsearch-interface:1.16.3 .
 
 push:
-	podman push quay.io/luigizuccarelli/golang-elasticsearch-interface:1.15.6 
+	podman push --authfile=/home/lzuccarelli/config.json quay.io/luigizuccarelli/golang-elasticsearch-interface:1.16.3 
